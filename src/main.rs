@@ -6,11 +6,16 @@ pub struct DrinkingParty {
 }
 
 impl DrinkingParty {
-    fn payment_amounts_for_participants(&self, charge_amount: ChargeAmount) -> PaymentAmountsForParticipants {
-        let payment_amount_per_unit = self.participants
+    fn payment_amounts_for_participants(
+        &self,
+        charge_amount: ChargeAmount,
+    ) -> PaymentAmountsForParticipants {
+        let payment_amount_per_unit = self
+            .participants
             .sum_payment_rate(&self.rate)
             .payment_amount_per_unit(charge_amount);
-        self.participants.payment_amounts(payment_amount_per_unit, &self.rate)
+        self.participants
+            .payment_amounts(payment_amount_per_unit, &self.rate)
     }
 }
 
@@ -22,10 +27,16 @@ impl Participants {
         let Participants(participants) = self;
         participants
             .iter()
-            .fold(PaymentRateSum::default(), |sum, participant| participant.sum_payment_rate(rate, sum))
+            .fold(PaymentRateSum::default(), |sum, participant| {
+                participant.sum_payment_rate(rate, sum)
+            })
     }
 
-    pub fn payment_amounts(&self, payment_amount_per_unit: PaymentAmountPerUnit, rate: &PaymentRateForAmountClassification) -> PaymentAmountsForParticipants {
+    pub fn payment_amounts(
+        &self,
+        payment_amount_per_unit: PaymentAmountPerUnit,
+        rate: &PaymentRateForAmountClassification,
+    ) -> PaymentAmountsForParticipants {
         let Participants(participants) = self;
         participants
             .iter()
@@ -45,11 +56,19 @@ impl Participant {
         rate.payment_rate(&self.payment_amount_classification)
     }
 
-    pub fn sum_payment_rate(&self, rate: &PaymentRateForAmountClassification, audend: PaymentRateSum) -> PaymentRateSum {
+    pub fn sum_payment_rate(
+        &self,
+        rate: &PaymentRateForAmountClassification,
+        audend: PaymentRateSum,
+    ) -> PaymentRateSum {
         audend.add(self.payment_rate(rate))
     }
 
-    pub fn payment_amount(&self, payment_amount_per_unit: PaymentAmountPerUnit, rate: &PaymentRateForAmountClassification) -> PaymentAmountForPariticipant {
+    pub fn payment_amount(
+        &self,
+        payment_amount_per_unit: PaymentAmountPerUnit,
+        rate: &PaymentRateForAmountClassification,
+    ) -> PaymentAmountForPariticipant {
         let payment_rate = self.payment_rate(rate);
         PaymentAmountForPariticipant {
             participant: self.clone(),
@@ -130,12 +149,15 @@ pub struct PaymentAmountForPariticipant {
 pub struct PaymentAmountsForParticipants(Vec<PaymentAmountForPariticipant>);
 
 impl std::iter::FromIterator<PaymentAmountForPariticipant> for PaymentAmountsForParticipants {
-    fn from_iter<I: IntoIterator<Item=PaymentAmountForPariticipant>>(iter: I) -> Self {
+    fn from_iter<I: IntoIterator<Item = PaymentAmountForPariticipant>>(iter: I) -> Self {
         PaymentAmountsForParticipants(Vec::from_iter(iter))
     }
 }
 
-fn drinking_party_service(drinking_party: DrinkingParty, charge_amount: ChargeAmount) -> PaymentAmountsForParticipants {
+fn drinking_party_service(
+    drinking_party: DrinkingParty,
+    charge_amount: ChargeAmount,
+) -> PaymentAmountsForParticipants {
     drinking_party.payment_amounts_for_participants(charge_amount)
 }
 
@@ -163,5 +185,8 @@ fn main() {
         },
     };
     let charge_amount = ChargeAmount(5000);
-    println!("{:?}", drinking_party_service(drinking_party, charge_amount));
+    println!(
+        "{:?}",
+        drinking_party_service(drinking_party, charge_amount)
+    );
 }
