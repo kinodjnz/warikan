@@ -2,7 +2,7 @@
 pub struct DrinkingParty {
     name: String,
     participants: Participants,
-    rate: PaymentRateForAmountClassification,
+    weight: PaymentWeightForAmountClassification,
 }
 
 impl DrinkingParty {
@@ -12,10 +12,10 @@ impl DrinkingParty {
     ) -> PaymentAmountsForParticipants {
         let payment_amount_per_unit = self
             .participants
-            .sum_payment_rate(&self.rate)
+            .sum_payment_weight(&self.weight)
             .payment_amount_per_unit(charge_amount);
         self.participants
-            .payment_amounts(payment_amount_per_unit, &self.rate)
+            .payment_amounts(payment_amount_per_unit, &self.weight)
     }
 }
 
@@ -23,24 +23,27 @@ impl DrinkingParty {
 pub struct Participants(Vec<Participant>);
 
 impl Participants {
-    pub fn sum_payment_rate(&self, rate: &PaymentRateForAmountClassification) -> PaymentRateSum {
+    pub fn sum_payment_weight(
+        &self,
+        weight: &PaymentWeightForAmountClassification,
+    ) -> PaymentWeightSum {
         let Participants(participants) = self;
         participants
             .iter()
-            .fold(PaymentRateSum::default(), |sum, participant| {
-                participant.sum_payment_rate(rate, sum)
+            .fold(PaymentWeightSum::default(), |sum, participant| {
+                participant.sum_payment_weight(weight, sum)
             })
     }
 
     pub fn payment_amounts(
         &self,
         payment_amount_per_unit: PaymentAmountPerUnit,
-        rate: &PaymentRateForAmountClassification,
+        weight: &PaymentWeightForAmountClassification,
     ) -> PaymentAmountsForParticipants {
         let Participants(participants) = self;
         participants
             .iter()
-            .map(|participant| participant.payment_amount(payment_amount_per_unit, rate))
+            .map(|participant| participant.payment_amount(payment_amount_per_unit, weight))
             .collect::<PaymentAmountsForParticipants>()
     }
 }
@@ -52,52 +55,50 @@ pub struct Participant {
 }
 
 impl Participant {
-    pub fn payment_rate(&self, rate: &PaymentRateForAmountClassification) -> PaymentRate {
-        rate.payment_rate(&self.payment_amount_classification)
+    pub fn payment_weight(&self, weight: &PaymentWeightForAmountClassification) -> PaymentWeight {
+        weight.payment_weight(self.payment_amount_classification)
     }
 
-    pub fn sum_payment_rate(
+    pub fn sum_payment_weight(
         &self,
-        rate: &PaymentRateForAmountClassification,
-        audend: PaymentRateSum,
-    ) -> PaymentRateSum {
-        audend.add(self.payment_rate(rate))
+        weight: &PaymentWeightForAmountClassification,
+        audend: PaymentWeightSum,
+    ) -> PaymentWeightSum {
+        audend.add_weight(self.payment_weight(weight))
     }
 
     pub fn payment_amount(
         &self,
         payment_amount_per_unit: PaymentAmountPerUnit,
-        rate: &PaymentRateForAmountClassification,
+        weight: &PaymentWeightForAmountClassification,
     ) -> PaymentAmountForPariticipant {
-        let payment_rate = self.payment_rate(rate);
+        let payment_weight = self.payment_weight(weight);
         PaymentAmountForPariticipant {
             participant: self.clone(),
-            payment_amount: payment_amount_per_unit.payment_amount(payment_rate),
+            payment_amount: payment_amount_per_unit.payment_amount(payment_weight),
         }
     }
 }
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct PaymentRate {
-    percent: i32,
-}
+pub struct PaymentWeight(i32);
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
 pub struct ChargeAmount(i32);
 
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash, Default)]
-pub struct PaymentRateSum(i32);
+pub struct PaymentWeightSum(i32);
 
-impl PaymentRateSum {
-    pub fn add(&self, payment_rate: PaymentRate) -> PaymentRateSum {
-        let PaymentRateSum(mut s) = self;
-        s += payment_rate.percent;
-        PaymentRateSum(s)
+impl PaymentWeightSum {
+    pub fn add_weight(self, payment_weight: PaymentWeight) -> PaymentWeightSum {
+        let PaymentWeightSum(mut s) = self;
+        s += payment_weight.0;
+        PaymentWeightSum(s)
     }
 
-    pub fn payment_amount_per_unit(&self, charge_amount: ChargeAmount) -> PaymentAmountPerUnit {
-        let PaymentRateSum(s) = self;
-        PaymentAmountPerUnit((charge_amount.0 as f64) / ((*s as f64) / 100.0))
+    pub fn payment_amount_per_unit(self, charge_amount: ChargeAmount) -> PaymentAmountPerUnit {
+        let PaymentWeightSum(s) = self;
+        PaymentAmountPerUnit((charge_amount.0 as f64) / ((s as f64) / 100.0))
     }
 }
 
@@ -105,9 +106,9 @@ impl PaymentRateSum {
 pub struct PaymentAmountPerUnit(f64);
 
 impl PaymentAmountPerUnit {
-    pub fn payment_amount(&self, payment_rate: PaymentRate) -> PaymentAmount {
+    pub fn payment_amount(self, payment_weight: PaymentWeight) -> PaymentAmount {
         let PaymentAmountPerUnit(payment_amount_per_unit) = self;
-        let payment_amount_f64 = *payment_amount_per_unit * ((payment_rate.percent as f64) / 100.0);
+        let payment_amount_f64 = payment_amount_per_unit * ((payment_weight.0 as f64) / 100.0);
         PaymentAmount(payment_amount_f64 as i32)
     }
 }
@@ -120,14 +121,14 @@ pub enum PaymentAmountClassification {
 }
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct PaymentRateForAmountClassification {
-    for_larger: PaymentRate,
-    for_medium: PaymentRate,
-    for_smaller: PaymentRate,
+pub struct PaymentWeightForAmountClassification {
+    for_larger: PaymentWeight,
+    for_medium: PaymentWeight,
+    for_smaller: PaymentWeight,
 }
 
-impl PaymentRateForAmountClassification {
-    fn payment_rate(&self, classification: &PaymentAmountClassification) -> PaymentRate {
+impl PaymentWeightForAmountClassification {
+    fn payment_weight(&self, classification: PaymentAmountClassification) -> PaymentWeight {
         match classification {
             PaymentAmountClassification::Larger => self.for_larger,
             PaymentAmountClassification::Medium => self.for_medium,
@@ -178,10 +179,10 @@ fn main() {
                 payment_amount_classification: PaymentAmountClassification::Smaller,
             },
         ]),
-        rate: PaymentRateForAmountClassification {
-            for_larger: PaymentRate { percent: 150 },
-            for_medium: PaymentRate { percent: 100 },
-            for_smaller: PaymentRate { percent: 50 },
+        weight: PaymentWeightForAmountClassification {
+            for_larger: PaymentWeight(150),
+            for_medium: PaymentWeight(100),
+            for_smaller: PaymentWeight(50),
         },
     };
     let charge_amount = ChargeAmount(5000);
