@@ -1,6 +1,5 @@
 use crate::charge_amount::ChargeAmount;
-use crate::participant::Participants;
-use crate::payment_amount::PaymentAmountsForParticipants;
+use crate::participant::{Participants, PaymentAmountsForParticipants};
 use crate::payment_amount_classification::PaymentWeightForAmountClassification;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -32,7 +31,7 @@ impl DrinkingParty {
             .sum_payment_weight(&self.weight)
             .payment_ratio_for_unit_weight();
         let payment_amount_per_unit =
-            charge_amount.payment_amount_per_unit(payment_ratio_for_unit_weight);
+            charge_amount.payment_amount_per_unit_weight(payment_ratio_for_unit_weight);
         self.participants
             .payment_amounts(payment_amount_per_unit, &self.weight)
     }

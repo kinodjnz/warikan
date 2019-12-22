@@ -1,10 +1,9 @@
-use crate::payment_amount::{
-    PaymentAmountForParticipant, PaymentAmountPerUnit, PaymentAmountsForParticipants,
-};
+use crate::payment_amount::{PaymentAmount, PaymentAmountPerUnitWeight};
 use crate::payment_amount_classification::{
     PaymentAmountClassification, PaymentWeightForAmountClassification,
 };
 use crate::payment_weight::{PaymentWeight, PaymentWeightSum};
+use std::iter::FromIterator;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Participants(pub Vec<Participant>);
@@ -18,19 +17,19 @@ impl Participants {
         participants
             .iter()
             .fold(PaymentWeightSum::default(), |sum, participant| {
-                participant.sum_payment_weight(weight, sum)
+                participant.add_payment_weight(weight, sum)
             })
     }
 
     pub fn payment_amounts(
         &self,
-        payment_amount_per_unit: PaymentAmountPerUnit,
+        payment_amount_per_unit_weight: PaymentAmountPerUnitWeight,
         weight: &PaymentWeightForAmountClassification,
     ) -> PaymentAmountsForParticipants {
         let Participants(participants) = self;
         participants
             .iter()
-            .map(|participant| participant.payment_amount(payment_amount_per_unit, weight))
+            .map(|participant| participant.payment_amount(payment_amount_per_unit_weight, weight))
             .collect::<PaymentAmountsForParticipants>()
     }
 }
@@ -56,7 +55,7 @@ impl Participant {
         weight.payment_weight(self.payment_amount_classification)
     }
 
-    pub fn sum_payment_weight(
+    pub fn add_payment_weight(
         &self,
         weight: &PaymentWeightForAmountClassification,
         audend: PaymentWeightSum,
@@ -66,13 +65,40 @@ impl Participant {
 
     pub fn payment_amount(
         &self,
-        payment_amount_per_unit: PaymentAmountPerUnit,
+        payment_amount_per_unit_weight: PaymentAmountPerUnitWeight,
         weight: &PaymentWeightForAmountClassification,
     ) -> PaymentAmountForParticipant {
         let payment_weight = self.payment_weight(weight);
         PaymentAmountForParticipant::new(
             self.clone(),
-            payment_amount_per_unit.payment_amount(payment_weight),
+            payment_amount_per_unit_weight.payment_amount(payment_weight),
         )
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct PaymentAmountForParticipant {
+    participant: Participant,
+    payment_amount: PaymentAmount,
+}
+
+impl PaymentAmountForParticipant {
+    pub fn new(
+        participant: Participant,
+        payment_amount: PaymentAmount,
+    ) -> PaymentAmountForParticipant {
+        PaymentAmountForParticipant {
+            participant,
+            payment_amount,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct PaymentAmountsForParticipants(Vec<PaymentAmountForParticipant>);
+
+impl FromIterator<PaymentAmountForParticipant> for PaymentAmountsForParticipants {
+    fn from_iter<I: IntoIterator<Item = PaymentAmountForParticipant>>(iter: I) -> Self {
+        PaymentAmountsForParticipants(Vec::from_iter(iter))
     }
 }

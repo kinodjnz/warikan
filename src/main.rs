@@ -7,8 +7,7 @@ mod payment_weight;
 
 use crate::charge_amount::ChargeAmount;
 use crate::drinking_party::DrinkingParty;
-use crate::participant::{Participant, Participants};
-use crate::payment_amount::PaymentAmountsForParticipants;
+use crate::participant::{Participant, Participants, PaymentAmountsForParticipants};
 use crate::payment_amount_classification::{
     PaymentAmountClassification, PaymentWeightForAmountClassification,
 };
