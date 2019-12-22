@@ -27,10 +27,12 @@ impl DrinkingParty {
         &self,
         charge_amount: ChargeAmount,
     ) -> PaymentAmountsForParticipants {
-        let payment_amount_per_unit = self
+        let payment_ratio_for_unit_weight = self
             .participants
             .sum_payment_weight(&self.weight)
-            .payment_amount_per_unit(charge_amount);
+            .payment_ratio_for_unit_weight();
+        let payment_amount_per_unit =
+            charge_amount.payment_amount_per_unit(payment_ratio_for_unit_weight);
         self.participants
             .payment_amounts(payment_amount_per_unit, &self.weight)
     }

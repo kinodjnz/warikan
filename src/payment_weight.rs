@@ -1,6 +1,3 @@
-use crate::charge_amount::ChargeAmount;
-use crate::payment_amount::PaymentAmountPerUnit;
-
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct PaymentWeight(pub i32);
 
@@ -14,8 +11,11 @@ impl PaymentWeightSum {
         PaymentWeightSum(s)
     }
 
-    pub fn payment_amount_per_unit(self, charge_amount: ChargeAmount) -> PaymentAmountPerUnit {
+    pub fn payment_ratio_for_unit_weight(self) -> PaymentRatioForUnitWeight {
         let PaymentWeightSum(s) = self;
-        PaymentAmountPerUnit((charge_amount.0 as f64) / ((s as f64) / 100.0))
+        PaymentRatioForUnitWeight(1.0 / (s as f64))
     }
 }
+
+#[derive(Debug, Copy, Clone, PartialEq, PartialOrd)]
+pub struct PaymentRatioForUnitWeight(pub f64);

@@ -11,7 +11,7 @@ pub struct PaymentAmountPerUnit(pub f64);
 impl PaymentAmountPerUnit {
     pub fn payment_amount(self, payment_weight: PaymentWeight) -> PaymentAmount {
         let PaymentAmountPerUnit(payment_amount_per_unit) = self;
-        let payment_amount_f64 = payment_amount_per_unit * ((payment_weight.0 as f64) / 100.0);
+        let payment_amount_f64 = payment_amount_per_unit * (payment_weight.0 as f64);
         PaymentAmount(payment_amount_f64 as i32)
     }
 }
