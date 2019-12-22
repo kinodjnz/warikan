@@ -1,5 +1,6 @@
 use crate::participant::Participant;
 use crate::payment_weight::PaymentWeight;
+use std::iter::FromIterator;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct PaymentAmount(pub i32);
@@ -43,7 +44,7 @@ impl PaymentAmountForParticipant {
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct PaymentAmountsForParticipants(Vec<PaymentAmountForParticipant>);
 
-impl std::iter::FromIterator<PaymentAmountForParticipant> for PaymentAmountsForParticipants {
+impl FromIterator<PaymentAmountForParticipant> for PaymentAmountsForParticipants {
     fn from_iter<I: IntoIterator<Item = PaymentAmountForParticipant>>(iter: I) -> Self {
         PaymentAmountsForParticipants(Vec::from_iter(iter))
     }

@@ -52,7 +52,7 @@ impl Participant {
         }
     }
 
-    pub fn payment_weight(&self, weight: &PaymentWeightForAmountClassification) -> PaymentWeight {
+    fn payment_weight(&self, weight: &PaymentWeightForAmountClassification) -> PaymentWeight {
         weight.payment_weight(self.payment_amount_classification)
     }
 
