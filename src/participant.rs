@@ -1,10 +1,10 @@
 use crate::payment_amount::{
-    PaymentAmountClassification, PaymentAmountForParticipant, PaymentAmountPerUnit,
-    PaymentAmountsForParticipants,
+    PaymentAmountForParticipant, PaymentAmountPerUnit, PaymentAmountsForParticipants,
 };
-use crate::payment_weight::{
-    PaymentWeight, PaymentWeightForAmountClassification, PaymentWeightSum,
+use crate::payment_amount_classification::{
+    PaymentAmountClassification, PaymentWeightForAmountClassification,
 };
+use crate::payment_weight::{PaymentWeight, PaymentWeightSum};
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Participants(pub Vec<Participant>);

@@ -1,7 +1,7 @@
 use crate::charge_amount::ChargeAmount;
 use crate::participant::Participants;
 use crate::payment_amount::PaymentAmountsForParticipants;
-use crate::payment_weight::PaymentWeightForAmountClassification;
+use crate::payment_amount_classification::PaymentWeightForAmountClassification;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct DrinkingParty {

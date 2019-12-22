@@ -2,13 +2,17 @@ mod charge_amount;
 mod drinking_party;
 mod participant;
 mod payment_amount;
+mod payment_amount_classification;
 mod payment_weight;
 
 use crate::charge_amount::ChargeAmount;
 use crate::drinking_party::DrinkingParty;
 use crate::participant::{Participant, Participants};
-use crate::payment_amount::{PaymentAmountClassification, PaymentAmountsForParticipants};
-use crate::payment_weight::{PaymentWeight, PaymentWeightForAmountClassification};
+use crate::payment_amount::PaymentAmountsForParticipants;
+use crate::payment_amount_classification::{
+    PaymentAmountClassification, PaymentWeightForAmountClassification,
+};
+use crate::payment_weight::PaymentWeight;
 
 fn drinking_party_service(
     drinking_party: DrinkingParty,

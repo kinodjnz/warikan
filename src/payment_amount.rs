@@ -16,13 +16,6 @@ impl PaymentAmountPerUnit {
     }
 }
 
-#[derive(Debug, Copy, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub enum PaymentAmountClassification {
-    Larger,
-    Medium,
-    Smaller,
-}
-
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct PaymentAmountForParticipant {
     participant: Participant,
