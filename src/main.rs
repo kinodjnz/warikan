@@ -1,9 +1,11 @@
+mod additive_category;
 mod charge_amount;
 mod drinking_party;
 mod participant;
 mod payment_amount;
 mod payment_amount_classification;
 mod payment_weight;
+mod unital_magma;
 
 use crate::charge_amount::ChargeAmount;
 use crate::drinking_party::DrinkingParty;
