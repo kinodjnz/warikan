@@ -1,8 +1,9 @@
+use crate::additive_category::AdditiveCategory;
 use crate::payment_amount::{PaymentAmount, PaymentAmountPerUnitWeight};
 use crate::payment_amount_classification::{
     PaymentAmountClassification, PaymentWeightForAmountClassification,
 };
-use crate::payment_weight::{PaymentWeight, PaymentWeightSum};
+use crate::payment_weight::{PaymentWeight, PaymentWeightSum, PaymentWeightSumCalculator};
 use std::iter::FromIterator;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -14,11 +15,11 @@ impl Participants {
         weight: &PaymentWeightForAmountClassification,
     ) -> PaymentWeightSum {
         let Participants(participants) = self;
-        participants
-            .iter()
-            .fold(PaymentWeightSum::default(), |sum, participant| {
-                participant.add_payment_weight(weight, sum)
-            })
+        PaymentWeightSumCalculator::sum(
+            participants
+                .iter()
+                .map(|participant| participant.payment_weight(weight)),
+        )
     }
 
     pub fn payment_amounts(
@@ -53,14 +54,6 @@ impl Participant {
 
     fn payment_weight(&self, weight: &PaymentWeightForAmountClassification) -> PaymentWeight {
         weight.payment_weight(self.payment_amount_classification)
-    }
-
-    pub fn add_payment_weight(
-        &self,
-        weight: &PaymentWeightForAmountClassification,
-        audend: PaymentWeightSum,
-    ) -> PaymentWeightSum {
-        audend.add_weight(self.payment_weight(weight))
     }
 
     pub fn payment_amount(
