@@ -18,7 +18,7 @@ use crate::payment_amount_classification::{
 use crate::payment_weight::PaymentWeight;
 
 fn drinking_party_service(
-    drinking_party: DrinkingParty,
+    drinking_party: &DrinkingParty,
     charge_amount: ChargeAmount,
 ) -> PaymentAmountsForParticipants {
     drinking_party.payment_amounts_for_participants(charge_amount)
@@ -41,6 +41,6 @@ fn main() {
     let charge_amount = ChargeAmount(5000);
     println!(
         "{:?}",
-        drinking_party_service(drinking_party, charge_amount)
+        drinking_party_service(&drinking_party, charge_amount)
     );
 }
