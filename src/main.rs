@@ -1,10 +1,12 @@
-mod additive_category;
+mod additive_ratio;
 mod charge_amount;
 mod drinking_party;
 mod participant;
 mod payment_amount;
 mod payment_amount_classification;
+mod payment_ratio;
 mod payment_weight;
+mod sum;
 mod unital_magma;
 
 use crate::charge_amount::ChargeAmount;
@@ -31,9 +33,9 @@ fn main() {
             Participant::new("member3".into(), PaymentAmountClassification::Smaller),
         ]),
         PaymentWeightForAmountClassification::new(
-            PaymentWeight(150),
-            PaymentWeight(100),
-            PaymentWeight(50),
+            PaymentWeight::new(150),
+            PaymentWeight::new(100),
+            PaymentWeight::new(50),
         ),
     );
     let charge_amount = ChargeAmount(5000);

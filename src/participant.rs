@@ -1,9 +1,11 @@
-use crate::additive_category::AdditiveCategory;
-use crate::payment_amount::{PaymentAmount, PaymentAmountPerUnitWeight};
+use crate::additive_ratio::AdditiveRatio;
+use crate::payment_amount::PaymentAmount;
 use crate::payment_amount_classification::{
     PaymentAmountClassification, PaymentWeightForAmountClassification,
 };
-use crate::payment_weight::{PaymentWeight, PaymentWeightSum, PaymentWeightSumCalculator};
+use crate::payment_ratio::PaymentRatio;
+use crate::payment_weight::{PaymentWeight, PaymentWeightSum};
+use crate::sum::Sum;
 use std::iter::FromIterator;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
@@ -15,7 +17,7 @@ impl Participants {
         weight: &PaymentWeightForAmountClassification,
     ) -> PaymentWeightSum {
         let Participants(participants) = self;
-        PaymentWeightSumCalculator::sum(
+        PaymentWeightSum::of_iter(
             participants
                 .iter()
                 .map(|participant| participant.payment_weight(weight)),
@@ -24,13 +26,13 @@ impl Participants {
 
     pub fn payment_amounts(
         &self,
-        payment_amount_per_unit_weight: PaymentAmountPerUnitWeight,
+        ratio: PaymentRatio,
         weight: &PaymentWeightForAmountClassification,
     ) -> PaymentAmountsForParticipants {
         let Participants(participants) = self;
         participants
             .iter()
-            .map(|participant| participant.payment_amount(payment_amount_per_unit_weight, weight))
+            .map(|participant| participant.payment_amount(ratio, weight))
             .collect::<PaymentAmountsForParticipants>()
     }
 }
@@ -58,14 +60,11 @@ impl Participant {
 
     pub fn payment_amount(
         &self,
-        payment_amount_per_unit_weight: PaymentAmountPerUnitWeight,
+        ratio: PaymentRatio,
         weight: &PaymentWeightForAmountClassification,
     ) -> PaymentAmountForParticipant {
         let payment_weight = self.payment_weight(weight);
-        PaymentAmountForParticipant::new(
-            self.clone(),
-            payment_amount_per_unit_weight.payment_amount(payment_weight),
-        )
+        PaymentAmountForParticipant::new(self.clone(), ratio.apply_to(payment_weight))
     }
 }
 

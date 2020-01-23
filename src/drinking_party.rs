@@ -1,6 +1,8 @@
+use crate::additive_ratio::AdditiveRatio;
 use crate::charge_amount::ChargeAmount;
 use crate::participant::{Participants, PaymentAmountsForParticipants};
 use crate::payment_amount_classification::PaymentWeightForAmountClassification;
+use crate::payment_ratio::PaymentRatio;
 
 #[derive(Debug, Clone, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct DrinkingParty {
@@ -26,13 +28,8 @@ impl DrinkingParty {
         &self,
         charge_amount: ChargeAmount,
     ) -> PaymentAmountsForParticipants {
-        let payment_ratio_for_unit_weight = self
-            .participants
-            .sum_payment_weight(&self.weight)
-            .payment_ratio_for_unit_weight();
-        let payment_amount_per_unit =
-            charge_amount.payment_amount_per_unit_weight(payment_ratio_for_unit_weight);
-        self.participants
-            .payment_amounts(payment_amount_per_unit, &self.weight)
+        let payment_weight_sum = self.participants.sum_payment_weight(&self.weight);
+        let ratio = PaymentRatio::of_sums(payment_weight_sum, charge_amount);
+        self.participants.payment_amounts(ratio, &self.weight)
     }
 }
